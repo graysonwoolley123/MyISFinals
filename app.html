@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fishing Pong - Grayson Whooley</title>
+    <style>
+        body {
+            background-color: #2c3e50;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        canvas {
+            background-color: #34495e;
+            border: 5px solid #bd5d38; /* Matching your theme color */
+            display: block;
+        }
+
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .back-link {
+            margin-top: 15px;
+            color: #bd5d38;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Angler Pong</h1>
+    <p>Score: <span id="score">0</span></p>
+    
+    <canvas id="pongCanvas" width="600" height="400"></canvas>
+
+    <div class="controls">
+        <p>Use <b>Mouse</b> or <b>Touch</b> to move the paddle.</p>
+        <button onclick="resetGame()" style="padding: 10px 20px; cursor: pointer;">Reset Game</button>
+        <br><br>
+        <a href="scratch.html" class="back-link">← Back to Fishing Page</a>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("pongCanvas");
+        const ctx = canvas.getContext("2d");
+        const scoreDisplay = document.getElementById("score");
+
+        // Game Variables
+        let score = 0;
+        const paddleWidth = 10;
+        const paddleHeight = 80;
+        let paddleY = (canvas.height - paddleHeight) / 2;
+
+        let ballX = canvas.width / 2;
+        let ballY = canvas.height / 2;
+        let ballRadius = 8;
+        let ballSpeedX = 4;
+        let ballSpeedY = 4;
+
+        // Move paddle with mouse
+        canvas.addEventListener("mousemove", (e) => {
+            const rect = canvas.getBoundingClientRect();
+            paddleY = e.clientY - rect.top - paddleHeight / 2;
+        });
+
+        function resetGame() {
+            score = 0;
+            scoreDisplay.innerText = score;
+            ballX = canvas.width / 2;
+            ballY = canvas.height / 2;
+            ballSpeedX = 4;
+            ballSpeedY = 4;
+        }
+
+        function update() {
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            // Bounce off top and bottom
+            if (ballY + ballRadius > canvas.height || ballY - ballRadius < 0) {
+                ballSpeedY = -ballSpeedY;
+            }
+
+            // Bounce off right wall
+            if (ballX + ballRadius > canvas.width) {
+                ballSpeedX = -ballSpeedX;
+            }
+
+            // Paddle Collision (Left side)
+            if (ballX - ballRadius < paddleWidth) {
+                if (ballY > paddleY && ballY < paddleY + paddleHeight) {
+                    ballSpeedX = -ballSpeedX;
+                    score++;
+                    scoreDisplay.innerText = score;
+                    // Increase speed slightly to make it harder
+                    ballSpeedX *= 1.1; 
+                } else {
+                    // Game Over - Ball went past paddle
+                    alert("Game Over! Total Fish Saved: " + score);
+                    resetGame();
+                }
+            }
+        }
+
+        function draw() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Paddle
+            ctx.fillStyle = "#bd5d38";
+            ctx.fillRect(0, paddleY, paddleWidth, paddleHeight);
+
+            // Draw Ball (The "Fish")
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+            ctx.fillStyle = "#00f2fe";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>
